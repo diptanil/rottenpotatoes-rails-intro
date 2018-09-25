@@ -11,17 +11,53 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @sort_column = params[:sort_by]
     @all_ratings = Movie.all_ratings
-    @set_ratings = params[:ratings]
+    
+    redirect = false
+    
+    if params[:sort_by]
+      @sort_column = params[:sort_by]
+      session[:sort_by] = params[:sort_by]
+    elsif session[:sort_by]
+      @sort_column = session[:sort_by]
+      redirect = true
+    else
+      @sort_column = nil
+    end
+    
+    if params[:commit] == "Refresh" and params[:ratings].nil?
+      @set_ratings = nil
+      session[:ratings] = nil
+    elsif params[:ratings]
+      @set_ratings = params[:ratings]
+      session[:ratings] = params[:ratings]
+    elsif session[:ratings]
+      @set_ratings = session[:ratings]
+      redirect = true
+    else
+      @set_ratings = nil
+    end
+    
+    if redirect
+      flash.keep
+      redirect_to movies_path :sort_by => @sort_column, :ratings => @set_ratings
+    end
+    
+    
+    @movies = Movie.all
+    
+    if @set_ratings and @sort_column
+      @movies = Movie.where(:rating => @set_ratings.keys).all.order(@sort_column)
+    elsif @sort_column
+      @movies = Movie.all.order(@sort_column)
+    elsif @set_ratings
+      @movies = Movie.where(:rating => @set_ratings.keys)
+    end
+    
     if !@set_ratings
       @set_ratings = Hash.new
     end
-    if params[:ratings]
-      @movies = Movie.where(:rating => params[:ratings].keys).all.order(@sort_column)
-    else
-      @movies = Movie.all.order(@sort_column)
-    end
+    
   end
 
   def new

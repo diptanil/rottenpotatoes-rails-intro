@@ -27,8 +27,13 @@ class MoviesController < ApplicationController
     end
     
     if params[:commit] == "Refresh" and params[:ratings].nil?
-      @set_ratings = nil
-      session[:ratings] = nil
+      if session[:ratings]
+        @set_ratings = session[:ratings]
+        redirect = true
+      else
+        @set_ratings = @all_ratings
+        session[:ratings] = @all_ratings
+      end
     elsif params[:ratings]
       @set_ratings = params[:ratings]
       session[:ratings] = params[:ratings]
@@ -36,7 +41,7 @@ class MoviesController < ApplicationController
       @set_ratings = session[:ratings]
       redirect = true
     else
-      @set_ratings = nil
+      @set_ratings = @all_ratings
     end
     
     if redirect

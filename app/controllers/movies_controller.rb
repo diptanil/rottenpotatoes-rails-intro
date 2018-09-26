@@ -15,6 +15,7 @@ class MoviesController < ApplicationController
     
     redirect = false
     
+    #Look for change in params or retrieve the previous session
     if params[:sort_by]
       @sort_column = params[:sort_by]
       session[:sort_by] = params[:sort_by]
@@ -43,7 +44,7 @@ class MoviesController < ApplicationController
       redirect_to movies_path :sort_by => @sort_column, :ratings => @set_ratings
     end
     
-    
+    #Generate list of movies based on the parameters
     @movies = Movie.all
     
     if @set_ratings and @sort_column
